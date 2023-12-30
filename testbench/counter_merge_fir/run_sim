@@ -1,0 +1,21 @@
+rm -f counter_la_merge.hex
+
+riscv32-unknown-elf-gcc -Wl,--no-warn-rwx-segments -g \
+	--save-temps \
+	-Xlinker -Map=output.map \
+	-I../../firmware \
+	-march=rv32i -mabi=ilp32 -D__vexriscv__ -DUSER_PROJ_IRQ0_EN \
+	-Wl,-Bstatic,-T,../../firmware/sections.lds,--strip-discarded \
+	-ffreestanding -nostartfiles -o counter_la_merge.elf ../../firmware/crt0_vex.S ../../firmware/isr.c merge.c counter_la_merge.c
+# -nostartfiles	
+riscv32-unknown-elf-objcopy -O verilog counter_la_merge.elf counter_la_merge.hex
+riscv32-unknown-elf-objdump -D counter_la_merge.elf > counter_la_merge.out
+
+# to fix flash base address
+sed -ie 's/@10/@00/g' counter_la_merge.hex
+
+iverilog -Ttyp -DFUNCTIONAL -DSIM -DUNIT_DELAY=#1 \
+	-f./include.rtl.list -o counter_la_merge.vvp counter_la_merge_tb.v 
+
+vvp  counter_la_merge.vvp
+rm -f counter_la_merge.vvp counter_la_merge.elf counter_la_merge.hexe

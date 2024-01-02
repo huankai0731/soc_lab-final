@@ -1,0 +1,71 @@
+module sdram_controller (
+    // ... (existing input and output ports)
+
+    // Prefetch buffer signals
+    output [31:0] prefetch_data,
+    output prefetch_valid
+);
+
+    // ... (existing parameters, wires, and assignments)
+
+    // Prefetch buffer parameters
+    localparam PREFETCH_SIZE = 2; // Adjust the size as needed
+    localparam PREFETCH_DEPTH = 2; // Number of cycles ahead to prefetch
+
+    // Prefetch buffer registers
+    reg [31:0] prefetch_buffer[PREFETCH_SIZE-1:0];
+    reg [PREFETCH_SIZE-1:0] prefetch_valid_buffer;
+    reg [4:0] prefetch_count;
+
+    // Output assignments
+    assign prefetch_data = prefetch_buffer[0];
+    assign prefetch_valid = prefetch_valid_buffer[0];
+
+    // ... (existing logic)
+
+    always @* begin
+        // ... (existing logic)
+
+        // Prefetch buffer default values
+        prefetch_data = 32'hZZZZZZZZ;
+        prefetch_valid = 1'b0;
+
+        // Prefetch buffer handling
+        if (state_q == READ_RES) begin
+            // Shift data in prefetch buffer
+            for (i = PREFETCH_SIZE-1; i > 0; i = i - 1)
+                prefetch_buffer[i] = prefetch_buffer[i - 1];
+
+            // Fill the prefetch buffer with the current read data
+            prefetch_buffer[0] = dqi_q;
+
+            // Set the valid flag for the prefetch buffer
+            prefetch_valid_buffer = {prefetch_valid_buffer[PREFETCH_SIZE-2:0], 1'b1};
+        end else begin
+            // Clear prefetch buffer when not in READ_RES state
+            prefetch_buffer = {PREFETCH_SIZE{32'hZZZZZZZZ}};
+            prefetch_valid_buffer = {PREFETCH_SIZE{1'b0}};
+        end
+
+        // Prefetch count handling
+        if (in_valid && rw == 0 && state_q == IDLE) begin
+            prefetch_count = PREFETCH_DEPTH;
+        end else if (prefetch_count > 0) begin
+            prefetch_count = prefetch_count - 1;
+        end
+    end
+
+    always @(posedge clk) begin
+        // ... (existing logic)
+
+        // Reset prefetch buffer on reset
+        if (rst) begin
+            prefetch_buffer <= {PREFETCH_SIZE{32'hZZZZZZZZ}};
+            prefetch_valid_buffer <= {PREFETCH_SIZE{1'b0}};
+            prefetch_count <= 5'b0;
+        end
+    end
+
+    // ... (existing always block)
+
+endmodule

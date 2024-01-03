@@ -122,7 +122,7 @@ module user_proj_example #(
                        //qs_decoded == 1'b1 ? qs_sm_tdata ;   
 
     assign wbs_ack_o = ready || fir_ready || mm_ready;
-    //assign wbs_ack_o = ready || fir_ready ;
+    //assign wbs_ack_o = ready || fir_ready || mm_teady || qs_ready;
 
     // IO
     assign io_out = count;
@@ -206,6 +206,22 @@ module user_proj_example #(
     assign mm_ss_tvalid = wbs_cyc_i && wbs_stb_i && mm_decoded && wbs_sel_i && wbs_we_i;
 
 
+    //qs
+    wire qs_ready;
+    assign qs_ready = qs_ss_tready ||  qs_sm_tready;
+
+    //qs Axi stream
+    wire qs_ss_tvalid;
+    wire qs_ss_tready;
+    wire qs_ss_tlast;
+
+    wire qs_sm_tvalid;
+    wire qs_sm_tlast;
+    wire [31:0]qs_sm_tdata;
+    reg qs_sm_tready;
+
+    assign qs_ss_tvalid = wbs_cyc_i && wbs_stb_i && qs_decoded && wbs_sel_i && wbs_we_i;
+
     integer sm_DELAYS =10;
 
 //fir_sm_output delay
@@ -234,13 +250,28 @@ module user_proj_example #(
                 if ( delayed_count == sm_DELAYS ) begin
                     delayed_count <= 16'b0;
                     mm_sm_tready <= 1'b1;
-                    $display(mm_sm_tdata);
+                    //$display(mm_sm_tdata);
                 end else begin
                     delayed_count <= delayed_count + 1;
                 end
             end
     end
 
+//qs_sm output delay
+    always @(posedge clk) begin
+
+            qs_sm_tready <= 1'b0;
+
+            if ( qs_sm_tvalid && !qs_sm_tready && qs_decoded) begin
+                if ( delayed_count == sm_DELAYS ) begin
+                    delayed_count <= 16'b0;
+                    qs_sm_tready <= 1'b1;
+                    //$display(qs_sm_tdata);
+                end else begin
+                    delayed_count <= delayed_count + 1;
+                end
+            end
+    end
 
 //exmem delay
     always @(posedge clk) begin
@@ -337,13 +368,13 @@ module user_proj_example #(
         .axis_rst_n(rst)
 
         );
-
+/*
     Matmul matmul(
 
-        .ss_tvalid_A(mm_ss_tvalid),
-        .ss_tdata_A(wdata),
-        .ss_tlast_A(mm_ss_tlast),
-        .ss_tready_A(mm_ss_tready),
+        .ss_tvalid(mm_ss_tvalid),
+        .ss_tdata(wdata),
+        .ss_tlast(mm_ss_tlast),
+        .ss_tready(mm_ss_tready),
 
         .sm_tready(mm_sm_tready),
         .sm_tvalid(mm_sm_tvalid),
@@ -354,7 +385,7 @@ module user_proj_example #(
         .axis_rst_n(rst)
 
     );
-
+*/
 endmodule
 
 

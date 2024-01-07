@@ -1,0 +1,67 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Thu Jan  4 19:52:55 2024
+[*]
+[dumpfile] "/home/kai/caravel-soc_fpga-lab/final_uart2/testbench/uart/uart.vcd"
+[dumpfile_mtime] "Thu Jan  4 19:44:00 2024"
+[dumpfile_size] 618885120
+[savefile] "/home/kai/caravel-soc_fpga-lab/final_uart2/testbench/uart/rx_fifo.gtkw"
+[timestart] 0
+[size] 2488 1376
+[pos] -39 -39
+*-29.000000 3881000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] uart_tb.
+[treeopen] uart_tb.uut.
+[treeopen] uart_tb.uut.mprj.
+[treeopen] uart_tb.uut.mprj.uart.
+[treeopen] uart_tb.uut.mprj.uart.ctrl.
+[sst_width] 233
+[signals_width] 323
+[sst_expanded] 1
+[sst_vpaned_height] 414
+@200
+-wb
+@28
+uart_tb.uut.mprj.uart.ctrl.i_wb_valid
+@22
+uart_tb.uut.mprj.uart.ctrl.i_wb_adr[31:0]
+@28
+uart_tb.uut.mprj.uart.ctrl.o_wb_ack
+@22
+uart_tb.uut.mprj.uart.ctrl.i_wb_dat[31:0]
+uart_tb.uut.mprj.uart.ctrl.o_wb_dat[31:0]
+@200
+-
+-ctr
+@22
+uart_tb.uut.mprj.uart.ctrl.tx_buffer[31:0]
+uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+@200
+-
+-rx
+@22
+uart_tb.uut.mprj.uart.receive.rx_data[7:0]
+@28
+uart_tb.uut.mprj.uart.receive.rx
+uart_tb.uut.mprj.uart.receive.rx_index[2:0]
+uart_tb.uut.mprj.uart.receive.rx_finish
+@29
+uart_tb.uut.mprj.uart.receive.state[3:0]
+@28
+uart_tb.uut.mprj.uart.receive.irq
+@200
+-
+-rx fifo
+@28
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.fifo_empty
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.fifo_full
+@22
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.rd_data[7:0]
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+@28
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.rd_en
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_en
+@22
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.rd_ptr[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,95 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Thu Jan  4 17:44:32 2024
+[*]
+[dumpfile] "/home/kai/caravel-soc_fpga-lab/final_uart2/testbench/uart/uart.vcd"
+[dumpfile_mtime] "Thu Jan  4 16:11:00 2024"
+[dumpfile_size] 223043584
+[savefile] "/home/kai/caravel-soc_fpga-lab/final_uart2/testbench/uart/uart_rx_org.gtkw"
+[timestart] 638000000
+[size] 1553 1001
+[pos] -1 -1
+*-29.000000 2715087500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] uart_tb.
+[treeopen] uart_tb.uut.
+[treeopen] uart_tb.uut.mprj.
+[treeopen] uart_tb.uut.mprj.uart.
+[treeopen] uart_tb.uut.mprj.uart.ctrl.
+[sst_width] 233
+[signals_width] 247
+[sst_expanded] 1
+[sst_vpaned_height] 284
+@28
+uart_tb.uut.mprj.uart.receive.busy
+@22
+uart_tb.uut.mprj.uart.ctrl.rx_buffer[31:0]
+uart_tb.uut.mprj.uart.ctrl.o_wb_dat[31:0]
+@28
+uart_tb.uut.mprj.uart.ctrl.o_wb_ack
+uart_tb.uut.mprj.uart.transmission.tx
+uart_tb.uut.mprj.uart.transmission.tx_index[2:0]
+uart_tb.tbuart.tx_start
+@22
+uart_tb.tbuart.tx_data[7:0]
+uart_tb.tbuart.tx_pattern[7:0]
+uart_tb.checkbits[15:0]
+@200
+-wb
+@22
+uart_tb.uut.mprj.wbs_dat_i[31:0]
+uart_tb.uut.mprj.wbs_dat_o[31:0]
+uart_tb.uut.mprj.wbs_adr_i[31:0]
+@200
+-
+-rx
+@29
+uart_tb.uut.mprj.uart.receive.state[3:0]
+@28
+uart_tb.uut.mprj.uart.receive.rx
+uart_tb.uut.mprj.uart.receive.rx_index[2:0]
+uart_tb.uut.mprj.uart.receive.rx_finish
+@22
+uart_tb.uut.mprj.uart.receive.rx_data[7:0]
+@28
+uart_tb.uut.mprj.uart.receive.busy
+uart_tb.uut.mprj.uart.receive.irq
+@200
+-
+-ctr
+@28
+uart_tb.uut.mprj.uart.ctrl.i_tx_busy
+@800022
+uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+@28
+(26)uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+(27)uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+(28)uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+(29)uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+(30)uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+(31)uart_tb.uut.mprj.uart.ctrl.stat_reg[31:0]
+@1001200
+-group_end
+@28
+uart_tb.uut.mprj.uart.user_irq[2:0]
+@200
+-
+-rx fifo
+@28
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_en
+@c00022
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+@28
+(0)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(1)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(2)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(3)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(4)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(5)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(6)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+(7)uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_data[7:0]
+@1401200
+-group_end
+@22
+uart_tb.uut.mprj.uart.ctrl.receiver_fifo.wr_ptr[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

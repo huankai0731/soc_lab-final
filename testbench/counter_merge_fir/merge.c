@@ -44,7 +44,7 @@ while (1) {if (reg_fir_control == 4) {break;}}
 		while (1) {
 			// x is ready to accept data ap_ctl:(010000)
 		if (reg_fir_control == 16) {
-			reg_fir_input = n+1;
+			reg_fir_input = x[n];
 			break;
 		}
 		}

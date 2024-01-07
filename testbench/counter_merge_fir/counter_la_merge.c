@@ -123,28 +123,28 @@ void main()
 	// Configure LA probes from [63:32] as inputs to disable counter write
 	reg_la1_oenb = reg_la1_iena = 0x00000000;    
 	
-/*	
+
 	int* tmp_fir = fir();
     //counter_la_fir
-	reg_mprj_datal = *(tmp_fir+7) << 16;
+
 	reg_mprj_datal = *(tmp_fir+8) << 16;
 	reg_mprj_datal = *(tmp_fir+9) << 16;
 	reg_mprj_datal = *(tmp_fir+10) << 16;	
-*/
+
 
 	
 	int* tmp_mm = matmul();
-/*	
+	
     //counter_la_mm
 	reg_mprj_datal = *tmp_mm << 16;
-	reg_mprj_datal = *(tmp_mm+1) << 16;
-	reg_mprj_datal = *(tmp_mm+2) << 16;
-	reg_mprj_datal = *(tmp_mm+3) << 16;	
-	reg_mprj_datal = *(tmp_mm+12) << 16;
-	reg_mprj_datal = *(tmp_mm+13) << 16;
-	reg_mprj_datal = *(tmp_mm+14) << 16;
-	reg_mprj_datal = *(tmp_mm+15) << 16;
-*/	
+	//reg_mprj_datal = *(tmp_mm+1) << 16;
+	//reg_mprj_datal = *(tmp_mm+2) << 16;
+	//reg_mprj_datal = *(tmp_mm+3) << 16;	
+	//reg_mprj_datal = *(tmp_mm+12) << 16;
+	//reg_mprj_datal = *(tmp_mm+13) << 16;
+	//reg_mprj_datal = *(tmp_mm+14) << 16;
+	//reg_mprj_datal = *(tmp_mm+15) << 16;
+	
 	
 	
 	//finish

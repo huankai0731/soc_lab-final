@@ -55,7 +55,8 @@ assign sm_tdata   = C_r[cout_r];
         Load:begin
             state_w=Load;
             if(flag_r && counter_r == 15 && ss_tvalid)begin //判斷條件也許擇一就可以
-            state_w=Alu;
+            
+            //$display("fuck");
             end
         end
 
@@ -114,7 +115,10 @@ assign sm_tdata   = C_r[cout_r];
             if (flag_r && counter_r==15 && ss_tvalid) begin
                 flag_w = 0;
                 counter_w = 0;
+                counter_r = 0;
                 ss_tready_w = 0;
+                flag_r = 0;
+                state_r=Alu;
             end
          end
 

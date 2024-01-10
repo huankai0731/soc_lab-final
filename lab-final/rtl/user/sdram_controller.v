@@ -48,16 +48,27 @@ module sdram_controller (
     // Address Remap
     //   - remap user address to addr to create more offpage/onpage cases
     // 
+    /*
     wire [22:0] addr;
-    wire [4:0] Mapped_RA;
-    //wire [9:0]Mapped_RA2;
+    wire [12:0] Mapped_RA;
+    wire [1:0]  Mapped_BA;
+    wire [7:0]  Mapped_CA;
+    assign Mapped_RA = user_addr[22:10];
+    assign Mapped_BA = user_addr[9:8];
+    assign Mapped_CA = user_addr[7:0];
+    assign addr = {Mapped_RA, Mapped_BA, Mapped_CA};
+*/
+
+    wire [22:0] addr;
+    wire [9:6] Mapped_RA;
     wire [1:0]  Mapped_BA;
     wire [5:0]  Mapped_CA;
     assign Mapped_RA = user_addr[10:6];
-    //assign Mapped_RA2 = user_addr[8];
     assign Mapped_BA = user_addr[12:11];
     assign Mapped_CA = user_addr[5:0];
-    assign addr = {10'b0,Mapped_RA, Mapped_BA, Mapped_CA};
+    assign addr = {9'b0,Mapped_RA, Mapped_BA, Mapped_CA , 2'b0};
+
+
 
     // Commands for the SDRAM
     localparam CMD_UNSELECTED    = 4'b1000;

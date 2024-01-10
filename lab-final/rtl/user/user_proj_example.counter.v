@@ -13,7 +13,7 @@
 // limitations under the License.
 // SPDX-License-Identifier: Apache-2.0
 
-`default_nettype wire
+`default_nettype none
 /*
  *-------------------------------------------------------------
  *
@@ -44,10 +44,6 @@ module user_proj_example #(
     inout vssd1,	// User area 1 digital ground
 `endif
 
-`define MPRJ_IO_PADS_1 19	/* number of user GPIO pads on user1 side */
-`define MPRJ_IO_PADS_2 19	/* number of user GPIO pads on user2 side */
-`define MPRJ_IO_PADS (`MPRJ_IO_PADS_1 + `MPRJ_IO_PADS_2)
-
     // Wishbone Slave ports (WB MI A)
     input wb_clk_i,
     input wb_rst_i,
@@ -73,7 +69,15 @@ module user_proj_example #(
     // IRQ
     output [2:0] irq
 );
-    //sdram
+    wire clk;
+    wire rst, rst_n;
+
+    wire [`MPRJ_IO_PADS-1:0] io_in;
+    wire [`MPRJ_IO_PADS-1:0] io_out;
+    wire [`MPRJ_IO_PADS-1:0] io_oeb;
+
+    wire valid;
+
     wire sdram_cle;
     wire sdram_cs;
     wire sdram_cas;
@@ -92,7 +96,6 @@ module user_proj_example #(
 
     reg ctrl_in_valid_q;
 
-
     //tap_ram
     wire tap_WE;
     wire tap_EN;
@@ -108,18 +111,13 @@ module user_proj_example #(
     wire [11:0]data_AR;
     wire [31:0]data_Di;
     wire [31:0]data_Do;
-    wire clk;
-    wire rst;
 
-    wire [`MPRJ_IO_PADS-1:0] io_in;
-    wire [`MPRJ_IO_PADS-1:0] io_out;
-    wire [`MPRJ_IO_PADS-1:0] io_oeb;
 
     wire [31:0] exmem_rdata; 
     wire [31:0] wdata;
     wire [BITS-1:0] count;
 
-    wire valid;
+
     wire [3:0] wstrb;
     wire [31:0] la_write;
 
@@ -130,37 +128,17 @@ module user_proj_example #(
     reg [BITS-17:0] delayed_count2=0;
     reg [BITS-17:0] delayed_count3=0;
 
-
-
-
+    
     // WB MI A
-    /*
-    assign valid = wbs_cyc_i && wbs_stb_i && decoded; 
-    assign wstrb = wbs_sel_i & {4{wbs_we_i}};
-    assign wdata = wbs_dat_i;
-    */
-
-    //sdram
-    assign valid = wbs_stb_i && wbs_cyc_i && decoded; 
+    
+    assign valid = wbs_stb_i && wbs_cyc_i;
     assign ctrl_in_valid = wbs_we_i ? valid : ~ctrl_in_valid_q && valid;
     assign wbs_ack_o = (wbs_we_i) ? ~ctrl_busy && valid : ctrl_out_valid; 
     assign bram_mask = wbs_sel_i & {4{wbs_we_i}};
     assign ctrl_addr = wbs_adr_i[22:0];
     assign ready = (wbs_we_i) ? ~ctrl_busy && valid : ctrl_out_valid; 
 
-
-
-    //wb output
-    assign wbs_dat_o = decoded       == 1'b1 ? exmem_rdata : 
-                       axi_l_decoded == 1'b1 ? rdata : 
-                       axi_s_decoded == 1'b1 ? fir_sm_tdata : mm_sm_tdata ;
-                       
-                       //mm_decoded    == 1'b1 ? mm_sm_tdata : 
-                       //qs_decoded == 1'b1 ? qs_sm_tdata ;   
-
-    assign wbs_ack_o = ready || fir_ready || mm_ready;
-    //assign wbs_ack_o = ready || fir_ready || mm_teady || qs_ready;
-
+////////////////////////////////////////////////////////////////////////////////////////
     // IO
     assign io_out = d2c_data;
     assign io_oeb = {(`MPRJ_IO_PADS-1){rst}};
@@ -170,11 +148,23 @@ module user_proj_example #(
 
     // LA
     assign la_data_out = {{(127-BITS){1'b0}}, d2c_data};
-
     // Assuming LA probes [65:64] are for controlling the count clk & reset  
     assign clk = (~la_oenb[64]) ? la_data_in[64]: wb_clk_i;
     assign rst = (~la_oenb[65]) ? la_data_in[65]: wb_rst_i;
     assign rst_n = ~rst;
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+    assign wbs_dat_o = decoded       == 1'b1 ? exmem_rdata : 
+                       axi_l_decoded == 1'b1 ? rdata : 
+                       axi_s_decoded == 1'b1 ? fir_sm_tdata : mm_sm_tdata ;
+
+
+    //assign wbs_dat_o = decoded       == 1'b1 ? exmem_rdata : mm_sm_tdata ;
+
+
+    assign wbs_ack_o = ready || fir_ready || mm_ready;
+    //assign wbs_ack_o = ready  || mm_ready;
 
     wire decoded;
     assign decoded = wbs_adr_i[31:20] == 12'h380 ? 1'b1 : 1'b0;
@@ -184,9 +174,6 @@ module user_proj_example #(
 
     wire mm_decoded;
     assign mm_decoded = {wbs_adr_i[31:20],wbs_adr_i[11:8] } == 16'h3001 ? 1'b1 : 1'b0;
-
-    wire qs_decoded;
-    assign qs_decoded = {wbs_adr_i[31:20],wbs_adr_i[11:8] } == 16'h3002 ? 1'b1 : 1'b0;
 
     //fir
     wire fir_ready;
@@ -224,7 +211,6 @@ module user_proj_example #(
     assign axi_s_decoded = fir_decodeed & wbs_adr_i[7];
     assign fir_ss_tvalid = wbs_cyc_i && wbs_stb_i && axi_s_decoded && wbs_sel_i && wbs_we_i;
 
-
     //mm
     wire mm_ready;
     assign mm_ready = mm_ss_tready ||  mm_sm_tready;
@@ -242,23 +228,13 @@ module user_proj_example #(
     assign mm_ss_tvalid = wbs_cyc_i && wbs_stb_i && mm_decoded && wbs_sel_i && wbs_we_i;
 
 
-    //qs
-    wire qs_ready;
-    assign qs_ready = qs_ss_tready ||  qs_sm_tready;
 
-    //qs Axi stream
-    wire qs_ss_tvalid;
-    wire qs_ss_tready;
-    wire qs_ss_tlast;
 
-    wire qs_sm_tvalid;
-    wire qs_sm_tlast;
-    wire [31:0]qs_sm_tdata;
-    reg qs_sm_tready;
 
-    assign qs_ss_tvalid = wbs_cyc_i && wbs_stb_i && qs_decoded && wbs_sel_i && wbs_we_i;
+
 
     integer sm_DELAYS =10;
+
 
 //fir_sm_output delay
     always @(posedge clk) begin
@@ -276,24 +252,12 @@ module user_proj_example #(
             end
     end
 
-    always @(posedge clk) begin
-        //if(valid & wbs_we_i)
-        //$display("%h",wbs_adr_i);
-        //$display("%h",wbs_dat_o);
-        //$display("%b",wbs_ack_o);
-        //if(valid)$display("%h",wbs_adr_i);
-        //if(wbs_adr_i[31:24]==8'b110000)
-        //$display("%h",wbs_adr_i);
-    end
-
-
 //mm_sm output delay
     always @(posedge clk) begin
 
             mm_sm_tready <= 1'b0;
 
             if ( mm_sm_tvalid && !mm_sm_tready && mm_decoded) begin
-                
                 if ( delayed_count2 == sm_DELAYS ) begin
                     delayed_count2 <= 16'b0;
                     mm_sm_tready <= 1'b1;
@@ -303,24 +267,6 @@ module user_proj_example #(
                 end
             end
     end
-
-//qs_sm output delay
-    always @(posedge clk) begin
-
-            qs_sm_tready <= 1'b0;
-
-            if ( qs_sm_tvalid && !qs_sm_tready && qs_decoded) begin
-                $display(qs_sm_tdata);
-                if ( delayed_count == sm_DELAYS ) begin
-                    delayed_count <= 16'b0;
-                    qs_sm_tready <= 1'b1;
-                    
-                end else begin
-                    delayed_count <= delayed_count + 1;
-                end
-            end
-    end
-
 
 
     always @(posedge clk) begin
@@ -333,27 +279,9 @@ module user_proj_example #(
             else if (ctrl_out_valid)
                 ctrl_in_valid_q <= 1'b0;
         end
+        //if(wbs_adr_i[31:24]==8'b110000)
+        //$display("%h",wbs_adr_i);
     end
-
-/*
-//exmem delay
-    always @(posedge clk) begin
-        if (rst) begin
-            ready <= 1'b0;
-            delayed_count <= 16'b0;
-        end else begin
-            ready <= 1'b0;
-            if ( valid && !ready ) begin
-                if ( delayed_count == DELAYS ) begin
-                    delayed_count <= 16'b0;
-                    ready <= 1'b1;
-                end else begin
-                    delayed_count <= delayed_count + 1;
-                end
-            end
-        end
-    end
-*/
 
     sdram_controller user_sdram_controller (
         .clk(clk),
@@ -394,16 +322,6 @@ module user_proj_example #(
         .Dqo(d2c_data)
     );
 
-/*
-    bram user_bram (
-        .CLK(clk),
-        .WE0(wstrb),
-        .EN0(valid),
-        .Di0(wbs_dat_i),
-        .Do0(exmem_rdata),
-        .A0(exmem_addr)
-    );
-*/
     bram11 tap_RAM (
         .clk(clk),
         .we(tap_WE),
@@ -431,7 +349,7 @@ module user_proj_example #(
         .awvalid(awvalid),
         .awaddr(awaddr),
         .wvalid(wvalid),
-        .wdata(wdata),
+        .wdata(wbs_dat_i),
 
         .arready(arready),
         .rready(rready),
@@ -442,7 +360,7 @@ module user_proj_example #(
 
 
         .ss_tvalid(fir_ss_tvalid),
-        .ss_tdata(wdata),
+        .ss_tdata(wbs_dat_i),
         .ss_tlast(fir_ss_tlast),
         .ss_tready(fir_ss_tready),
 
@@ -475,7 +393,7 @@ module user_proj_example #(
     Matmul matmul(
 
         .ss_tvalid(mm_ss_tvalid),
-        .ss_tdata(wdata),
+        .ss_tdata(wbs_dat_i),
         .ss_tlast(mm_ss_tlast),
         .ss_tready(mm_ss_tready),
 
@@ -488,11 +406,6 @@ module user_proj_example #(
         .axis_rst_n(rst)
 
     );
-
 endmodule
-
-
-
-
 
 `default_nettype wire

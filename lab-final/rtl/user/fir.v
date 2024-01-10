@@ -125,6 +125,7 @@ always  @(posedge  axis_clk) begin
     if(start && !fir) ap_ctr[4] <= 1'b1;
 
     if(start && fir) begin
+
         if(count < Tape_Num)begin
             if(fir_delay < 3)begin
                 tap_a <= count;
@@ -200,7 +201,7 @@ end
 always  @(posedge  axis_clk) begin  
     Wready <= 0; Awready <= 0; tap_we <= 1'b0; 
     if(!bram_init && wvalid && !Wready) begin   
-        $display("ss");
+        //$display("%d",wdata);
         case(awaddr[6:4])
             3'b000: begin   
                 ap_ctr <= wdata; 
@@ -259,6 +260,7 @@ integer ram_delay =0;
 integer x=0;
 always @(posedge axis_clk) begin
 if(bram_init) begin
+            
     ap_ctr <= 32'b100;
     if(x<11)begin
         if(ram_delay < 2)begin

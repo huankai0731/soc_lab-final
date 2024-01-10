@@ -14,7 +14,8 @@ MEMORY {
 	dff2 : ORIGIN = 0x00000400, LENGTH = 0x00000200
 	flash : ORIGIN = 0x10000000, LENGTH = 0x01000000
 	mprj : ORIGIN = 0x30000000, LENGTH = 0x00100000
-	mprjram : ORIGIN = 0x38000000, LENGTH = 0x000010000
+	mprjram : ORIGIN = 0x38000000, LENGTH = 0x00000800
+	all_data : ORIGIN = 0x38000800, LENGTH = 0x00000800
 	hk : ORIGIN = 0x26000000, LENGTH = 0x00100000
 	csr : ORIGIN = 0xf0000000, LENGTH = 0x00010000
 }
@@ -30,7 +31,7 @@ SECTIONS
 		KEEP(*crt0*(.text))
 		KEEP(*(.text.isr))
 
-		/* *(.text .stub .text.* .gnu.linkonce.t.*) */
+		*(.text .stub .text.* .gnu.linkonce.t.*)
 		_etext = .;
 	} > flash
 
@@ -54,7 +55,7 @@ SECTIONS
 		*(.sdata .sdata.* .gnu.linkonce.s.*)
 		. = ALIGN(8);
 		_edata = .;
-	} > dff AT > flash
+	} > all_data AT > flash
 
 	.bss :
 	{
@@ -69,13 +70,13 @@ SECTIONS
 		. = ALIGN(8);
 		_ebss = .;
 		_end = .;
-	} > dff AT > flash
+	} > all_data AT > flash
 
 	.mprjram :
 	{
 		. = ALIGN(8);
 		_fsram = .;
-		*libgcc.a:*(.text .text.*)
+
 	} > mprjram AT > flash
 }
 

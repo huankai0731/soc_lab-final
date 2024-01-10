@@ -78,19 +78,9 @@ module user_project_wrapper #(
     output [2:0] user_irq
 );
 
- 
-
-
-
-
-
-
-
-
 /*--------------------------------------*/
 /* User project is instantiated  here   */
 /*--------------------------------------*/
-
 
 user_proj_example mprj (
 `ifdef USE_POWER_PINS
@@ -128,9 +118,6 @@ user_proj_example mprj (
     .irq(user_irq)
 );
 
-
 endmodule	// user_project_wrapper
 
 `default_nettype wire
-
-

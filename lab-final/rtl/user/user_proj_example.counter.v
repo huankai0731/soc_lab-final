@@ -125,16 +125,29 @@ module user_proj_example #(
 
     wire [31:0]exmem_addr;
     assign exmem_addr = { {8{1'b0}}, wbs_adr_i[23:0]};
-    reg ready;
+    wire ready;
     reg [BITS-17:0] delayed_count;
     reg [BITS-17:0] delayed_count2=0;
     reg [BITS-17:0] delayed_count3=0;
 
+
+
+
     // WB MI A
+    /*
     assign valid = wbs_cyc_i && wbs_stb_i && decoded; 
     assign wstrb = wbs_sel_i & {4{wbs_we_i}};
     assign wdata = wbs_dat_i;
-    
+    */
+
+    //sdram
+    assign valid = wbs_stb_i && wbs_cyc_i && decoded; 
+    assign ctrl_in_valid = wbs_we_i ? valid : ~ctrl_in_valid_q && valid;
+    assign wbs_ack_o = (wbs_we_i) ? ~ctrl_busy && valid : ctrl_out_valid; 
+    assign bram_mask = wbs_sel_i & {4{wbs_we_i}};
+    assign ctrl_addr = wbs_adr_i[22:0];
+    assign ready = (wbs_we_i) ? ~ctrl_busy && valid : ctrl_out_valid; 
+
 
 
     //wb output
@@ -149,7 +162,7 @@ module user_proj_example #(
     //assign wbs_ack_o = ready || fir_ready || mm_teady || qs_ready;
 
     // IO
-    assign io_out = count;
+    assign io_out = d2c_data;
     assign io_oeb = {(`MPRJ_IO_PADS-1){rst}};
 
     // IRQ
@@ -249,7 +262,7 @@ module user_proj_example #(
 
 //fir_sm_output delay
     always @(posedge clk) begin
-
+        if(valid & wbs_we_i)
             fir_sm_tready <= 1'b0;
 
             if ( fir_sm_tvalid && !fir_sm_tready && axi_s_decoded) begin
@@ -261,6 +274,16 @@ module user_proj_example #(
                     delayed_count <= delayed_count + 1;
                 end
             end
+    end
+
+    always @(posedge clk) begin
+        //if(valid & wbs_we_i)
+        //$display("%h",wbs_adr_i);
+        //$display("%h",wbs_dat_o);
+        //$display("%b",wbs_ack_o);
+        //if(valid)$display("%h",wbs_adr_i);
+        //if(wbs_adr_i[31:24]==8'b110000)
+        //$display("%h",wbs_adr_i);
     end
 
 
@@ -312,7 +335,7 @@ module user_proj_example #(
         end
     end
 
-
+/*
 //exmem delay
     always @(posedge clk) begin
         if (rst) begin
@@ -330,8 +353,8 @@ module user_proj_example #(
             end
         end
     end
+*/
 
-/*
     sdram_controller user_sdram_controller (
         .clk(clk),
         .rst(rst),
@@ -350,7 +373,7 @@ module user_proj_example #(
         .user_addr(ctrl_addr),
         .rw(wbs_we_i),
         .data_in(wbs_dat_i),
-        .data_out(wbs_dat_o),
+        .data_out(exmem_rdata),
         .busy(ctrl_busy),
         .in_valid(ctrl_in_valid),
         .out_valid(ctrl_out_valid)
@@ -370,8 +393,8 @@ module user_proj_example #(
         .Dqi(c2d_data),
         .Dqo(d2c_data)
     );
-*/
 
+/*
     bram user_bram (
         .CLK(clk),
         .WE0(wstrb),
@@ -380,7 +403,7 @@ module user_proj_example #(
         .Do0(exmem_rdata),
         .A0(exmem_addr)
     );
-
+*/
     bram11 tap_RAM (
         .clk(clk),
         .we(tap_WE),

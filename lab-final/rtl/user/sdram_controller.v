@@ -37,20 +37,6 @@ module sdram_controller (
     localparam tREF             = 13'd6;       // 7T
     localparam tRef_Counter     = 10'd750;     // 
 
-    //prefetch buffer
-    localparam PREFETCH_SIZE = 2;
-    localparam PREFETCH_DEPTH = 2;
-
-    reg [31:0]prefetch_buffer[PREFETCH_SIZE-1:0];
-    reg [PREFETCH_SIZE-1:0] prefetch_valid_buffer;
-    reg [4:0] prefetch_count;
-    wire [31:0] prefetch_data;
-    wire prefetch_valid;
-
-    assign prefetch_data = prefetch_buffer[0];
-    assign prefetch_valid = prefetch_valid_buffer[0];
-
-
     // MA Map
     // BA (Bank Address) - 9:8
     // RA (Row Address)  - 22:10
@@ -63,13 +49,15 @@ module sdram_controller (
     //   - remap user address to addr to create more offpage/onpage cases
     // 
     wire [22:0] addr;
-    wire [12:0] Mapped_RA;
+    wire [4:0] Mapped_RA;
+    //wire [9:0]Mapped_RA2;
     wire [1:0]  Mapped_BA;
-    wire [7:0]  Mapped_CA;
-    assign Mapped_RA = user_addr[22:10];
-    assign Mapped_BA = user_addr[9:8];
-    assign Mapped_CA = user_addr[7:0];
-    assign addr = {Mapped_RA, Mapped_BA, Mapped_CA};
+    wire [5:0]  Mapped_CA;
+    assign Mapped_RA = user_addr[10:6];
+    //assign Mapped_RA2 = user_addr[8];
+    assign Mapped_BA = user_addr[12:11];
+    assign Mapped_CA = user_addr[5:0];
+    assign addr = {10'b0,Mapped_RA, Mapped_BA, Mapped_CA};
 
     // Commands for the SDRAM
     localparam CMD_UNSELECTED    = 4'b1000;
@@ -149,57 +137,6 @@ module sdram_controller (
     assign out_valid = out_valid_q;
     
     always @* begin
-
-
-
-
-        // Prefetch buffer default values
-        prefetch_buffer[0] = 32'hZZZZZZZZ;
-        prefetch_buffer[1] = 32'hZZZZZZZZ;
-        prefetch_valid_buffer[0] = 1'b0;
-
-        // Prefetch buffer handling
-        if (state_q == READ_RES) begin
-            // Shift data in prefetch buffer
-            for (i = PREFETCH_SIZE-1; i > 0; i = i - 1)
-                prefetch_buffer[i] = prefetch_buffer[i - 1];
-
-            // Fill the prefetch buffer with the current read data
-            prefetch_buffer[0] = dqi_q;
-
-            // Set the valid flag for the prefetch buffer
-            prefetch_valid_buffer = {prefetch_valid_buffer[PREFETCH_SIZE-2:0], 1'b1};
-        end else begin
-            // Clear prefetch buffer when not in READ_RES state
-            prefetch_buffer[0] = 32'hZZZZZZZZ;
-            prefetch_buffer[1] = 32'hZZZZZZZZ;
-            prefetch_valid_buffer = {PREFETCH_SIZE{1'b0}};
-        end
-
-        // Prefetch count handling
-        if (in_valid && rw == 0 && state_q == IDLE) begin
-            prefetch_count = PREFETCH_DEPTH;
-        end else if (prefetch_count > 0) begin
-            prefetch_count = prefetch_count - 1;
-        end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // Default values
         dq_d = dq_q;
         dqi_d = sdram_dqi;
@@ -252,7 +189,6 @@ module sdram_controller (
 
         case (state_q)
             ///// INITALIZATION /////
-            //00
             INIT: begin
                 // ready_d = 1'b0;
                 row_open_d = 4'b0;
@@ -282,7 +218,6 @@ module sdram_controller (
 
                 dq_en_d = 1'b0;
             end
-            //01
             WAIT: begin
                 delay_ctr_d = delay_ctr_q - 1'b1;
                 if (delay_ctr_q == 13'd0) begin
@@ -295,7 +230,6 @@ module sdram_controller (
             end
 
             ///// IDLE STATE /////
-            //06
             IDLE: begin
                 if (refresh_flag_q) begin // we need to do a refresh
                     state_d = PRECHARGE;
@@ -332,7 +266,6 @@ module sdram_controller (
             end
 
             ///// REFRESH /////
-            //07
             REFRESH: begin
                 cmd_d = CMD_REFRESH;
                 state_d = WAIT;
@@ -345,7 +278,6 @@ module sdram_controller (
             end
 
             ///// ACTIVATE /////
-            //08
             ACTIVATE: begin
                 cmd_d = CMD_ACTIVE;
                 a_d = addr_q[22:10];
@@ -367,10 +299,10 @@ module sdram_controller (
             end
 
             ///// READ /////
-            //09
             READ: begin
                 cmd_d = CMD_READ;
-                a_d = {2'b0, 1'b0, addr_q[7:0], 2'b0};
+                // a_d = {2'b0, 1'b0, addr_q[7:0], 2'b0};
+                a_d = {7'b0, addr_q[7:2]};
                 ba_d = addr_q[9:8];
                 state_d = WAIT;
 
@@ -381,7 +313,6 @@ module sdram_controller (
                 next_state_d = READ_RES;
 
             end
-            //a
             READ_RES: begin
                 data_d = dqi_q; // data_d by pass
                 out_valid_d = 1'b1;
@@ -389,21 +320,20 @@ module sdram_controller (
             end
 
             ///// WRITE /////
-            //B
             WRITE: begin
                 cmd_d = CMD_WRITE;
 
                 dq_d = data_q;
                 // data_d = data_q;
                 dq_en_d = 1'b1; // enable out bus
-                a_d = {2'b0, 1'b0, addr_q[7:0], 2'b00};
+                // a_d = {2'b0, 1'b0, addr_q[7:0], 2'b00};
+                a_d = {7'b0, addr_q[7:2]};
                 ba_d = addr_q[9:8];
 
                 state_d = IDLE;
             end
 
             ///// PRECHARGE /////
-            //c
             PRECHARGE: begin
                 cmd_d = CMD_PRECHARGE;
                 a_d[10] = precharge_bank_q[2]; // all banks
@@ -426,17 +356,6 @@ module sdram_controller (
     end
 
     always @(posedge clk) begin
-
-        // Reset prefetch buffer on reset
-        if (rst) begin
-            prefetch_buffer[0] <= 32'hZZZZZZZZ;
-            prefetch_buffer[1] <= 32'hZZZZZZZZ;
-            prefetch_valid_buffer <= {PREFETCH_SIZE{1'b0}};
-            prefetch_count <= 5'b0;
-        end
-
-
-
         if(rst) begin
             cle_q <= 1'b0;
             dq_en_q <= 1'b0;

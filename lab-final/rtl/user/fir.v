@@ -169,6 +169,7 @@ if(sm_tready) begin
     //reset all state
     if(data_count == data_length) begin
         //set ap_done = 1;ap_idle = 1; (000011)
+        //$display("ss");
         ap_ctr <= 6;
         data_count <= 0;
         bram_init <= 1;
@@ -199,6 +200,7 @@ end
 always  @(posedge  axis_clk) begin  
     Wready <= 0; Awready <= 0; tap_we <= 1'b0; 
     if(!bram_init && wvalid && !Wready) begin   
+        $display("ss");
         case(awaddr[6:4])
             3'b000: begin   
                 ap_ctr <= wdata; 

@@ -9,8 +9,8 @@
 -v ../../rtl/user/bram11.v
 -v ../../rtl/user/fir.v
 -v ../../rtl/user/Matmul.v
-##-v ../../rtl/user/sdr.v
-##-v ../../rtl/user/sdram_controller.v
+-v ../../rtl/user/sdr.v
+-v ../../rtl/user/sdram_controller.v
 
 ## VIP
 -v ../../vip/tbuart.v
